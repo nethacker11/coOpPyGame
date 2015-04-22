@@ -66,6 +66,22 @@ def makeBoard(blocks, width, height, screen):
             screen.blit(i.blockSize, i.blockShape)
         pygame.display.flip()
 
+def connectToServer(sock):
+    try:
+        sock.connect((SERVER, PORTONE))
+    except:
+        try:
+            sock.connect((SERVER, PORTTWO))
+        except:
+            try:
+                sock.connect((SERVER, PORTTHREE))
+            except:
+                print('could not connect')
+                sys.exit()
+
+
+
+
 def connectWithPlayer(clientSocket, serverSocket):
     try:
         socket.connect('127.0.0.1', 3000)
@@ -76,6 +92,21 @@ def connectWithPlayer(clientSocket, serverSocket):
         c, addr = serverSocket.accept()
         print('Connected with player')
     
+def passBoard(blocks):
+    boardState = {}
+    boardState['num'] = len(blocks)
+    blockList = []
+
+    for block in blocks:
+        blockList.append([block.x, block.y])
+       
+    boardState['regular'] = blockList
+    
+    jsonBoardState = json.dumps(boardState)
+    print(jsonBoardState)
+#        sock.send(jsonBoardState)
+
+
 
 def main():
     FPS = 30
@@ -100,18 +131,9 @@ def main():
 
     sock = socket.socket()
     try:
-        s.connect((SERVER, PORTONE))
+        connectToServer(sock)
     except:
-        try:
-            s.connect((SERVER, PORTTWO))
-        except:
-            try:
-                s.connect((SERVER, PORTTHREE))
-            except:
-                print('could not connect')
-                sys.exit()
-
-
+        print('could not connect')
 
   
     pygame.init()
@@ -125,22 +147,10 @@ def main():
     player = Player(0, 0)
     setPlayer(player, PLAYERWIDTH, PLAYERHEIGHT)
 
+    makeBoard(blocks, BLOCKWIDTH, BLOCKHEIGHT, screen)
 
     if PLAYER == False:
-        boardState = {}
-        makeBoard(blocks, BLOCKWIDTH, BLOCKHEIGHT, screen)
-        boardState['num'] = len(blocks)
-        blockList = []
-
-        for block in blocks:
-            blockList.append([block.x, block.y])
-           
-        boardState['regular'] = blockList
-        
-        jsonBoardState = json.dumps(boardState)
-        print(jsonBoardState)
-#        sock.send(jsonBoardState)
-
+        passBoard(blocks)
 
         
 
@@ -159,6 +169,8 @@ def main():
             if event.type == pygame.QUIT: 
                 sys.exit()
             elif event.type == KEYDOWN:
+                if event.key == pygame.K_q:
+                    sys.exit()
                 if event.key == pygame.K_DOWN or event.key == K_s:
                     KEYPRESS_DOWN = True
                 elif event.key == pygame.K_UP: # not sure why 
@@ -172,27 +184,13 @@ def main():
                     KEYPRESS_UP = False
                 elif event.key in (K_DOWN, K_s):
                     KEYPRESS_DOWN = False
-            elif event.type == MOUSEBUTTONDOWN:
-                p = pygame.mouse.get_pos()
-                for i in blocks:
-                    if i.blockShape.collidepoint(p):
-                        MOVING = True
-                        movingBlock = i
-            elif event.type == MOUSEBUTTONUP:
-                MOVING = False
-        
-        if MOVING == True:
-            p = pygame.mouse.get_pos()
-            movingBlock.setShape(p[0], p[1], 50, 50)
-
-
 
 
         screen.fill(BLACK)
         screen.blit(player.blockSize, player.blockShape)
         for i in blocks:
             if player.blockShape.colliderect(i.blockShape):
-                continue
+                None
                 #reset(player, blocks)
             screen.blit(i.blockSize, i.blockShape)
         pygame.display.flip()
@@ -212,29 +210,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-    '''
-    # server setup
-    s = socket.socket()
-    s.bind(('127.0.0.1', 3000))
-
-    s.listen(2)
-    print(s.getsockname()) 
-
-    # client setup
-
-    client = socket.socket()
-
-    try:
-        client.connect('127.0.0.1', 3000)
-    except:
-        print('could not connect, status is waiting')
-        try:
-            c, addr = s.accept()
-            print('connected with ' + addr[0])
-        except:
-            print('could not accept')
-'''
-
 
