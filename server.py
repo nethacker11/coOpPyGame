@@ -6,10 +6,21 @@ import time
 
 
 def play(info):
-    print(threading.currentThread().getName(), 'Starting')
-    print('first client ', info[0][1])
-    print('second client ', info[1][1])
-        
+    print(threading.currentThread().getName(), 'Starting') 
+
+    # Set sockets
+    playerOne = info[0][0]
+    playerTwo = info[1][0]
+    
+    # The first player in queue is player, second is maker
+    playerOne.send('player')
+    playerTwo.send('maker')
+
+    # Receive board from maker
+    boardState = playerTwo.recv(1024)
+
+    # Send back to player
+    playerOne.send(boardState)
 
 def main():
     sock = socket.socket()
@@ -19,12 +30,15 @@ def main():
     portThree = 1010
     try:
         sock.bind(('', portOne))
+        print('Connected on port ', portOne)
     except:
         try:
             sock.bind(('', portTwo))
+            print('Connected on port ', portTwo)
         except:
             try:
                 sock.bind(('', portThree))
+                print('Connected on port ', portThree)
             except:
                 print('count not bind socket')
                 sys.exit()
