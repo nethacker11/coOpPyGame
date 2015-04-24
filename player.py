@@ -5,6 +5,8 @@ class Player():
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.up = False
+        self.down = False
 
     def setImg(self, image):
         self.image = pygame.image.load(image)

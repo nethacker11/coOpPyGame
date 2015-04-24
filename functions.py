@@ -6,7 +6,6 @@ import time
 import sys
 import math
 import socket
-from functions import *
 from player import Player, Obstacle 
 from pygame.locals import *
 
@@ -68,6 +67,8 @@ def makeBoard(blocks, width, height, screen):
                         p = pygame.mouse.get_pos()
                         diffX = p[0] - block.x
                         diffY = p[1] - block.y
+                        print('diffX is: ', diffX)
+                        print('diffY is: ', diffY)
                         movingBlock.x = block.x + diffX
                         movingBlock.y = block.y + diffY
                        # block.setShape(p[0] - diffX, p[1] - diffY, width, height)
@@ -115,14 +116,26 @@ def connectToServer(sock):
             except:
                 sys.exit()
 
+def getPlayerInput(player):
 
-'''
-        for block in blocks:
-            if block.moving == True:
-                print('hello')
-                p = pygame.mouse.get_pos()
-                block.setShape(p[0] - diffX, p[1] - diffY, width, height)
-                #block.moving = False
-'''
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT: 
+            sys.exit()
+        elif event.type == KEYDOWN:
+            if event.key == pygame.K_q:
+                break
+            if event.key == pygame.K_DOWN or event.key == K_s:
+                player.down = True
+            elif event.key == pygame.K_UP: # not sure why event.key in (K_UP) doesnt work
+                player.up = True
+
+            elif event.key == pygame.K_p:
+                PAUSE = True
+        elif event.type == KEYUP:
+            if event.key in (K_DOWN, K_s):
+                player.down = False
+            elif event.key in (K_UP, K_w):
+                player.up = False
 
 

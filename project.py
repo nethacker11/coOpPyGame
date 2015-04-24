@@ -11,6 +11,7 @@ from player import Player, Obstacle
 from pygame.locals import *
 
 def main():
+ 
     FPS = 30
     WINWIDTH = 640
     WINHEIGHT = 480
@@ -22,14 +23,13 @@ def main():
     BLACK = 0,0,0
     KEYPRESS_UP = False
     KEYPRESS_DOWN = False
-    PAUSE = False
     MOVING = False
     PLAYER = False
     SERVER = '104.236.244.24'
     PORTONE = 8888
     PORTTWO = 9999
     PORTTHREE = 1010
- 
+
     # Try to connect to the server
     sock = socket.socket()
     try:
@@ -76,38 +76,13 @@ def main():
 
 
     # Start the single game loop 
-   
+    
+    playerInput = []
+
     while True:
 
-        if PAUSE == True:
-            for event in pygame.event.get():
-                if event.type == KEYDOWN:
-                    if event.key == pygame.K_u:
-                        PAUSE = False
-        if PAUSE == True:
-            continue
-
         player.setShape(player.x, player.y, PLAYERWIDTH, PLAYERHEIGHT)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: 
-                sys.exit()
-            elif event.type == KEYDOWN:
-                if event.key == pygame.K_q:
-                    break
-                if event.key == pygame.K_DOWN or event.key == K_s:
-                    KEYPRESS_DOWN = True
-                elif event.key == pygame.K_UP: # not sure why 
-                                               # event.key in (K_UP)        
-                                               # doesnt work
-                    KEYPRESS_UP = True
-                elif event.key == pygame.K_p:
-                    PAUSE = True
-            elif event.type == KEYUP:
-                if event.key in (K_UP, K_w):
-                    KEYPRESS_UP = False
-                elif event.key in (K_DOWN, K_s):
-                    KEYPRESS_DOWN = False
-
+        getPlayerInput(player)
 
         screen.fill(BLACK)
         screen.blit(player.blockSize, player.blockShape)
@@ -119,33 +94,12 @@ def main():
         pygame.display.flip()
         player.x += 1
         player.y += 1
-        if KEYPRESS_UP == True:
+        if player.up == True:
             player.y -= 3 
-        elif KEYPRESS_DOWN == True:
+        elif player.down == True:
                 player.y += 3
 
 
 if __name__ == '__main__':
     main()
-#            for i in range(boardState[u'num']):
-#               print(newBlocks[i][0])
-#               print(newBlocks[i][1])
-#               block = Obstacle(newBlocks[i][0], newBlocks[i][1])
-#               block.setImg('block.bmp')
-#               block.setSize(BLOCKWIDTH, BLOCKHEIGHT)
-#               block.setShape(block.x, block.y, BLOCKWIDTH, BLOCKHEIGHT)
-#               blocks.append(block)
-                
-#
-#        a = 0
-#        print('these are the test prints')
-#        for block in blocks:
-#            block.x = newBlocks[a][0]
-#            block.y = newBlocks[a][1]
-#            block.setShape(block.x, block.y, BLOCKWIDTH, BLOCKHEIGHT)
-#            a += 1
-#
-#        for i in blocks:
-#            screen.blit(i.blockSize, i.blockShape)
-
 
