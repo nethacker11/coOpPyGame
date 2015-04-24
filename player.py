@@ -20,6 +20,7 @@ class Obstacle():
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.moving = False
 
     def setImg(self, image):
         self.image = pygame.image.load(image)
@@ -28,6 +29,8 @@ class Obstacle():
         self.blockSize = pygame.transform.scale(self.image, (width, height))
 
     def setShape(self, x, y, width, height):
+        self.x = x
+        self.y = y
         self.blockShape = pygame.Rect(x, y, width, height)
 
 
