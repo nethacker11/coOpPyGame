@@ -58,7 +58,7 @@ def makeBoard(blocks, width, height, screen):
     MOVING = False
     diffX = 0 # Offset when moving blocks
     diffY = 0 # Offset when moving blocks
-    timeout = time.time() + 5 
+    timeout = time.time() + 15 
     black = 0,0,0
 
     while True:
