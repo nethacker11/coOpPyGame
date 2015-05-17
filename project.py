@@ -29,15 +29,26 @@ def main():
     PORTONE = 8888
     PORTTWO = 9999
     PORTTHREE = 1010
+    CONNECTED = False
+
+    playAgain = pygame.image.load('playAgain.bmp')
+    playAgainSize = pygame.transform.scale(playAgain, (200, 200))
+    playAgainShape = pygame.Rect((WINWIDTH/2)-100, (WINHEIGHT/2)-100, 200, 200)
+
 
     # Try to connect to the server
     sock = socket.socket()
     try:
         connectToServer(sock)
+        CONNECTED = True
     except:
         print('Could not connect')
 
-    
+    pygame.init()
+    FPS = pygame.time.Clock()
+    pygame.display.set_caption('Co-Op-Pyration')
+    screen = pygame.display.set_mode((WINWIDTH, WINHEIGHT)) 
+
     # Connected, now wait for server to find a second player
     # If you are the player, then wait for the board.
     startState = sock.recv(1024)
@@ -52,53 +63,26 @@ def main():
     player = Player(0, 0)
     setPlayer(player, PLAYERWIDTH, PLAYERHEIGHT)
 
-    if PLAYER == False:
-
-        pygame.init()
-        FPS = pygame.time.Clock()
-        pygame.display.set_caption('Co-Op-Pyration')
-        screen = pygame.display.set_mode((WINWIDTH, WINHEIGHT)) 
-
-        setBlocks(blocks, BLOCKWIDTH, BLOCKHEIGHT, NUMBLOCKS)
-        makeBoard(blocks, BLOCKWIDTH, BLOCKHEIGHT, screen)
-        passBoard(blocks, sock)
-        sys.exit()
-    else:    
-        playBoard = sock.recv(1024)
-        boardState = pickle.loads(playBoard)
-        for x in range(NUMBLOCKS):
-            blocks.append(setPlayerBlock(boardState[x][0], boardState[x][1], BLOCKWIDTH, BLOCKHEIGHT))
-
-        pygame.init()
-        FPS = pygame.time.Clock()
-        pygame.display.set_caption('Co-Op-Pyration')
-        screen = pygame.display.set_mode((WINWIDTH, WINHEIGHT)) 
+    if CONNECTED == True:
+        if PLAYER == False:
+            setBlocks(blocks, BLOCKWIDTH, BLOCKHEIGHT, NUMBLOCKS)
+            makeBoard(blocks, BLOCKWIDTH, BLOCKHEIGHT, screen)
+            passBoard(blocks, sock)
+            sys.exit()
+        else:    
+            playBoard = sock.recv(1024)
+            boardState = pickle.loads(playBoard)
+            for x in range(NUMBLOCKS):
+                blocks.append(setPlayerBlock(boardState[x][0], boardState[x][1], BLOCKWIDTH, BLOCKHEIGHT))
+    else:
+        setBlocksRand(blocks, WINWIDTH, WINHEIGHT, BLOCKWIDTH, BLOCKHEIGHT, NUMBLOCKS)
 
 
     # Start the single game loop 
     
     playerInput = []
-
-    while True:
-
-        player.setShape(player.x, player.y, PLAYERWIDTH, PLAYERHEIGHT)
-        getPlayerInput(player)
-
-        screen.fill(BLACK)
-        screen.blit(player.blockSize, player.blockShape)
-        for i in blocks:
-            if player.blockShape.colliderect(i.blockShape):
-                pass 
-                #reset(player, blocks)
-            screen.blit(i.blockSize, i.blockShape)
-        pygame.display.flip()
-        player.x += 1
-        player.y += 1
-        if player.up == True:
-            player.y -= 3 
-        elif player.down == True:
-                player.y += 3
-
+    
+    mainLoop(player, PLAYERWIDTH, PLAYERHEIGHT, BLACK, blocks, screen, playAgainSize, playAgainShape, WINWIDTH, WINHEIGHT, NUMBLOCKS, BLOCKWIDTH, BLOCKHEIGHT)
 
 if __name__ == '__main__':
     main()

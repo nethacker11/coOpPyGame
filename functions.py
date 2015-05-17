@@ -1,5 +1,5 @@
-import random
 import pickle
+from random import randint
 import json
 import pygame
 import time
@@ -20,11 +20,20 @@ def setBlocks(blocks, width, height, num):
         blocks.append(block)
         posX += 60
 
+def setBlocksRand(blocks, screenWidth, screenHeight, width, height, num):
+    for x in range(num):
+
+        posX = randint(100, screenWidth)
+        posY = randint(0, screenHeight)
+        block = Obstacle(posX, posY)
+        block.setImg('block.bmp')
+        block.setSize(width, height)
+        block.setShape(block.x, block.y, width, height)
+        blocks.append(block)
+
 def setPlayerBlock(x, y, width, height):
     posX = x
     posY = y
-    print(x)
-    print(y)
     block = Obstacle(posX, posY)
     block.setImg('block.bmp')
     block.setSize(width, height)
@@ -49,7 +58,7 @@ def makeBoard(blocks, width, height, screen):
     MOVING = False
     diffX = 0 # Offset when moving blocks
     diffY = 0 # Offset when moving blocks
-    timeout = time.time() + 10 
+    timeout = time.time() + 5 
     black = 0,0,0
 
     while True:
@@ -67,8 +76,6 @@ def makeBoard(blocks, width, height, screen):
                         p = pygame.mouse.get_pos()
                         diffX = p[0] - block.x
                         diffY = p[1] - block.y
-                        print('diffX is: ', diffX)
-                        print('diffY is: ', diffY)
                         movingBlock.x = block.x + diffX
                         movingBlock.y = block.y + diffY
                        # block.setShape(p[0] - diffX, p[1] - diffY, width, height)
@@ -138,4 +145,46 @@ def getPlayerInput(player):
             elif event.key in (K_UP, K_w):
                 player.up = False
 
+def mainLoop(player, PLAYERWIDTH, PLAYERHEIGHT, BLACK, blocks, screen, playAgainSize, playAgainShape, WINWIDTH, WINHEIGHT, NUMBLOCKS, BLOCKWIDTH, BLOCKHEIGHT):
+    while True:
 
+        player.setShape(player.x, player.y, PLAYERWIDTH, PLAYERHEIGHT)
+        getPlayerInput(player)
+
+        screen.fill(BLACK)
+        screen.blit(player.blockSize, player.blockShape)
+        for i in blocks:
+            if player.blockShape.colliderect(i.blockShape):
+                continueGame = gameOver(screen, playAgainSize, playAgainShape)
+                if continueGame == 'yes':
+                    del blocks[:]
+                    setBlocksRand(blocks, WINWIDTH, WINHEIGHT, BLOCKWIDTH, BLOCKHEIGHT, NUMBLOCKS) 
+                    player.x = 0
+                    player.y = 0
+                    player.up = False
+                    player.down = False
+                    continue
+                pass
+            screen.blit(i.blockSize, i.blockShape)
+        pygame.display.flip()
+        player.x += 1
+        player.y += 1
+        if player.up == True:
+            player.y -= 3 
+        elif player.down == True:
+                player.y += 3
+
+
+def gameOver(screen, playAgainSize, playAgainShape):
+
+    while True:
+        mouse = pygame.mouse.get_pos()
+       
+        for event in pygame.event.get():
+            if event.type == MOUSEBUTTONDOWN:
+                if playAgainShape.collidepoint(mouse):
+                    return 'yes'
+
+        screen.fill((0,0,0))
+        screen.blit(playAgainSize, playAgainShape)
+        pygame.display.flip()
